@@ -1,10 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Hello</title>
-  </head>
-  <body>
-    <h1>Hello, World!</h1>
-  </body>
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="none">
+<title>Some News</title>
+<style>
+body {color:#ccc;background-color:#000;font:1.2rem georgia,serif}
+ul {list-style:none;margin:0}
+li {margin:0.3rem 0}
+a {text-decoration:none;color:#69f}
+a:hover {color:#fff}
+
+footer {margin:1rem 2rem 2rem;border:0;border-top:1px solid #ccc;padding:0.5rem 0}
+footer a {color:#3c3}
+.mono {font-family:'courier new',courier,monospace}
+.time {color:#c93;}
+</style>
+</head>
+<body>
+
+<div id="app-target">Hello, World!</div>
+<footer>Powered by <a href="https://newsapi.org/">NewsAPI</a></footer>
+<script>
+(() => {
+  'use strict';
+
+  const esc = s => s ? s.replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/>/g, '&gt;')
+    .replace(/</g, '&lt;') : '';
+
+  const zfill = n => !isFinite(n) ? '00' : n < 10 ? '0' + n : '' + n;
+
+  const convTime = dateStr => {
+    const d = new Date(dateStr), h = zfill(d.getHours()), m = zfill(d.getMinutes());
+    return  `${h}:${m}`;
+  };
+
+  const row = story => `
+  <li>
+    <span class="time mono">${convTime(story.publishedAt)} </span>
+    <span class="source">${esc(story.source.name)}: </span>
+    <a href="${story.url}">${esc(story.title)}</a>
+  </li>`;
+
+  const renderStr = articles => {
+    if (!articles) return '<p class="error">data error</p>';
+    const rows = articles.map(row);
+    return '<p>Here\'s the news</p><ul>' + rows.join('') + '</ul>';
+  };
+
+  const loadStories = async () => {
+    const
+    res = await fetch('/api?category=general&country=us&feed=newsapi&size=100&type=top'),
+    data = await res.json();
+    return data.articles || data.data.articles;
+  };
+
+  const render = async () => {
+    const articles = await loadStories();
+    document.getElementById('app-target').innerHTML = renderStr(articles);
+  };
+
+  window.addEventListener('load', () => render());
+})();
+</script>
+</body>
 </html>
