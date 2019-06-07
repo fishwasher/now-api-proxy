@@ -1,0 +1,6 @@
+api/node_modules
+api/yarn.lock
+
+x_*
+node_modules
+yarn.lock
